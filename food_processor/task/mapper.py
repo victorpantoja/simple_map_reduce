@@ -2,6 +2,7 @@
 """
 This classe implements the map function of map / reduce.
 """
+from datetime import datetime
 import logging
 import os
 
@@ -49,9 +50,10 @@ class MapperTask(object):
         #just to control loop while testing
         index = 0
 
-        process_size = 1
+        process_size = 2
         pool = FoodStatsMultiProcessing(size=process_size, target=self.map)
 
+        start = datetime.now()
         while True:
             if index == 10:
                 break
@@ -63,11 +65,12 @@ class MapperTask(object):
             if not content['response']:
                 break
 
-            pool.add_task(content['response'], offset+1, content['meta']['next_offset'])
+            pool.add_task(content['response'], offset, content['meta']['next_offset'])
 
             offset = content['meta']['next_offset']
 
             #time.sleep(1)
+        logging.info("Request took %s\n--------------------\n" % (datetime.now() - start))
 
         pool.start()
         pool.join()
